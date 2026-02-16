@@ -29,18 +29,33 @@ export default function RootLayout({
                 }}>
                     <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
                         <Image
-                            src="/logo.png"
+                            src="/logo2.png"
                             alt="BharatRohan"
-                            width={160}
-                            height={40}
+                            width={42}
+                            height={42}
                             style={{ objectFit: 'contain' }}
                             priority
                         />
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <span style={{
+                                color: '#FFFFFF',
+                                fontSize: '18px',
+                                fontWeight: 700,
+                                lineHeight: '1.2',
+                                letterSpacing: '0.3px',
+                            }}>
+                                BharatRohan
+                            </span>
+                            <span style={{
+                                color: '#D4A017',
+                                fontSize: '11px',
+                                fontWeight: 500,
+                                lineHeight: '1.2',
+                            }}>
+                                Fleet Management
+                            </span>
+                        </div>
                     </Link>
-                    <div style={{ flex: 1 }} />
-                    <span style={{ color: '#52B788', fontSize: '14px', fontWeight: 500 }}>
-                        Fleet Management
-                    </span>
                 </nav>
                 <div style={{
                     height: '3px',
