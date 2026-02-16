@@ -5,7 +5,6 @@ export const revalidate = 60;
 
 interface ModelStats {
     model: string;
-    description: string;
     serialRange: string;
     droneCount: number;
     totalFlightHours: number;
@@ -31,7 +30,6 @@ export default async function HomePage() {
     const models: ModelStats[] = [
         {
             model: 'ALOKA',
-            description: 'Hyperspectral imaging drone for precision agriculture',
             serialRange: '2000 - 2099',
             droneCount: 0,
             totalFlightHours: 0,
@@ -39,7 +37,6 @@ export default async function HomePage() {
         },
         {
             model: 'PRAVIR-X4',
-            description: 'Agricultural spraying and survey drone',
             serialRange: '1000 - 1999',
             droneCount: 0,
             totalFlightHours: 0,
@@ -103,13 +100,6 @@ export default async function HomePage() {
                                     }}>
                                         {m.model}
                                     </h2>
-                                    <p style={{
-                                        margin: '4px 0 0',
-                                        fontSize: '13px',
-                                        color: '#6B6B6B',
-                                    }}>
-                                        {m.description}
-                                    </p>
                                 </div>
                                 <span style={{
                                     backgroundColor: '#1B4332',
