@@ -44,6 +44,9 @@ export default async function HomePage() {
         },
     ];
 
+    let unassignedCount = 0;
+    let unassignedLogs = 0;
+
     if (drones) {
         for (const drone of drones) {
             const model = getModelFromSerial(drone.serial_num);
@@ -52,6 +55,9 @@ export default async function HomePage() {
                 entry.droneCount += 1;
                 entry.totalFlightHours += drone.total_flight_hours || 0;
                 entry.logCount += countMap[drone.id] || 0;
+            } else {
+                unassignedCount += 1;
+                unassignedLogs += countMap[drone.id] || 0;
             }
         }
     }
@@ -160,6 +166,21 @@ export default async function HomePage() {
                     </Link>
                 ))}
             </div>
+
+            {unassignedCount > 0 && (
+                <div style={{ marginTop: '24px', textAlign: 'center' }}>
+                    <Link
+                        href="/models/unassigned"
+                        style={{
+                            color: '#6B6B6B',
+                            fontSize: '13px',
+                            textDecoration: 'underline',
+                        }}
+                    >
+                        View {unassignedLogs} unassigned log{unassignedLogs !== 1 ? 's' : ''} ({unassignedCount} drone{unassignedCount !== 1 ? 's' : ''})
+                    </Link>
+                </div>
+            )}
         </div>
     );
 }

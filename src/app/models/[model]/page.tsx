@@ -18,9 +18,11 @@ export default async function ModelPage({ params }: { params: { model: string } 
         .select('*')
         .order('serial_num', { ascending: true });
 
-    const drones = (allDrones || []).filter(
-        (d: Drone) => getModelFromSerial(d.serial_num) === model
-    );
+    const drones = (allDrones || []).filter((d: Drone) => {
+        const droneModel = getModelFromSerial(d.serial_num);
+        if (model === 'unassigned') return droneModel === 'Unknown';
+        return droneModel === model;
+    });
 
     const droneIds = drones.map((d: Drone) => d.id);
 
@@ -64,11 +66,13 @@ export default async function ModelPage({ params }: { params: { model: string } 
                     Home
                 </Link>
                 <span style={{ color: '#6B6B6B', margin: '0 8px' }}>/</span>
-                <span style={{ color: '#1B4332', fontSize: '14px', fontWeight: 600 }}>{model}</span>
+                <span style={{ color: '#1B4332', fontSize: '14px', fontWeight: 600 }}>
+                    {model === 'unassigned' ? 'Unassigned' : model}
+                </span>
             </div>
 
             <h1 style={{ marginTop: 0, color: '#1B4332', fontSize: '28px', fontWeight: 700 }}>
-                {model} Fleet
+                {model === 'unassigned' ? 'Unassigned Logs' : `${model} Fleet`}
             </h1>
             <p style={{ color: '#6B6B6B', marginTop: '-8px', marginBottom: '24px' }}>
                 {drones.length} drone{drones.length !== 1 ? 's' : ''} registered
