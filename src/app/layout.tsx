@@ -31,9 +31,9 @@ export default function RootLayout({
                         <Image
                             src="/logo2.png"
                             alt="BharatRohan"
-                            width={42}
-                            height={42}
-                            style={{ objectFit: 'contain' }}
+                            width={52}
+                            height={52}
+                            style={{ objectFit: 'cover', borderRadius: '50%' }}
                             priority
                         />
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
