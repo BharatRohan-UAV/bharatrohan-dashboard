@@ -33,7 +33,7 @@ export default function RootLayout({
                             alt="BharatRohan"
                             width={52}
                             height={52}
-                            style={{ objectFit: 'cover', borderRadius: '50%' }}
+                            style={{ objectFit: 'contain' }}
                             priority
                         />
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
