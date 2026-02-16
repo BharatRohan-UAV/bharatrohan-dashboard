@@ -23,6 +23,8 @@ export interface FlightLog {
     file_size_bytes: number;
     uploaded_at: string;
     log_date: string | null;
+    last_lat: number | null;
+    last_lon: number | null;
 }
 
 export interface MaintenanceNote {
@@ -30,4 +32,19 @@ export interface MaintenanceNote {
     drone_id: string;
     note: string;
     created_at: string;
+}
+
+export function getModelFromSerial(serialNum: string): string {
+    const num = parseInt(serialNum, 10);
+    if (!isNaN(num)) {
+        if (num >= 1000 && num <= 1999) return 'PRAVIR-X4';
+        if (num >= 2000 && num <= 2099) return 'ALOKA';
+    }
+    return 'Unknown';
+}
+
+export function getSerialRange(model: string): [number, number] {
+    if (model === 'PRAVIR-X4') return [1000, 1999];
+    if (model === 'ALOKA') return [2000, 2099];
+    return [0, 0];
 }

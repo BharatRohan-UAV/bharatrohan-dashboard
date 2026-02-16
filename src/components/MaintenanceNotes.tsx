@@ -62,25 +62,27 @@ export default function MaintenanceNotes({
                     rows={2}
                     style={{
                         flex: 1,
-                        padding: '8px 12px',
-                        border: '1px solid #ddd',
-                        borderRadius: '4px',
+                        padding: '10px 14px',
+                        border: '1px solid #E8E0D4',
+                        borderRadius: '8px',
                         fontSize: '14px',
                         fontFamily: 'inherit',
                         resize: 'vertical',
+                        outline: 'none',
                     }}
                 />
                 <button
                     onClick={addNote}
                     disabled={saving || !newNote.trim()}
                     style={{
-                        padding: '8px 16px',
-                        backgroundColor: saving ? '#ccc' : '#28a745',
+                        padding: '10px 18px',
+                        backgroundColor: saving ? '#ccc' : '#2D6A4F',
                         color: 'white',
                         border: 'none',
-                        borderRadius: '4px',
+                        borderRadius: '8px',
                         cursor: saving ? 'default' : 'pointer',
                         fontSize: '14px',
+                        fontWeight: 500,
                         alignSelf: 'flex-start',
                     }}
                 >
@@ -96,10 +98,10 @@ export default function MaintenanceNotes({
                         <div
                             key={note.id}
                             style={{
-                                padding: '12px',
-                                backgroundColor: '#f8f9fa',
-                                borderRadius: '4px',
-                                border: '1px solid #eee',
+                                padding: '12px 16px',
+                                backgroundColor: '#F8F6F1',
+                                borderRadius: '8px',
+                                border: '1px solid #E8E0D4',
                                 display: 'flex',
                                 justifyContent: 'space-between',
                                 alignItems: 'flex-start',
@@ -107,19 +109,21 @@ export default function MaintenanceNotes({
                             }}
                         >
                             <div style={{ flex: 1 }}>
-                                <div style={{ fontSize: '14px', marginBottom: '4px' }}>{note.note}</div>
-                                <div style={{ fontSize: '12px', color: '#888' }}>
+                                <div style={{ fontSize: '14px', marginBottom: '4px', color: '#2C2C2C' }}>
+                                    {note.note}
+                                </div>
+                                <div style={{ fontSize: '12px', color: '#6B6B6B' }}>
                                     {new Date(note.created_at).toLocaleString()}
                                 </div>
                             </div>
                             <button
                                 onClick={() => deleteNote(note.id)}
                                 style={{
-                                    padding: '4px 8px',
+                                    padding: '4px 10px',
                                     backgroundColor: 'transparent',
-                                    color: '#dc3545',
-                                    border: '1px solid #dc3545',
-                                    borderRadius: '4px',
+                                    color: '#c0392b',
+                                    border: '1px solid #c0392b',
+                                    borderRadius: '6px',
                                     cursor: 'pointer',
                                     fontSize: '12px',
                                 }}
