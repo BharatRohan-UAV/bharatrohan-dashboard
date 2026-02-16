@@ -27,12 +27,12 @@ export default function RootLayout({
                     alignItems: 'center',
                     gap: '16px',
                 }}>
-                    <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
+                    <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}>
                         <Image
                             src="/logo2.png"
                             alt="BharatRohan"
-                            width={52}
-                            height={52}
+                            width={64}
+                            height={64}
                             style={{ objectFit: 'contain' }}
                             priority
                         />
