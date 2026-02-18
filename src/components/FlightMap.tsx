@@ -35,7 +35,7 @@ export default function FlightMap({ lat, lon, gpsPath }: FlightMapProps) {
 
         // For interactive map, use Google Maps embed centered on the path center
         // with the last position as the query point
-        const embedSrc = `https://maps.google.com/maps?q=${centerLat},${centerLon}&z=15&output=embed`;
+        const embedSrc = `https://maps.google.com/maps?q=${centerLat},${centerLon}&z=15&t=k&output=embed`;
 
         return (
             <div style={{
@@ -56,7 +56,7 @@ export default function FlightMap({ lat, lon, gpsPath }: FlightMapProps) {
                         width: '8px',
                         height: '8px',
                         borderRadius: '50%',
-                        backgroundColor: '#2D6A4F',
+                        backgroundColor: '#FFD700',
                         display: 'inline-block',
                     }} />
                     <span style={{ fontSize: '13px', fontWeight: 600, color: '#1B4332' }}>
@@ -116,11 +116,11 @@ export default function FlightMap({ lat, lon, gpsPath }: FlightMapProps) {
                                     <polyline
                                         points={points}
                                         fill="none"
-                                        stroke="#2D6A4F"
+                                        stroke="#FFD700"
                                         strokeWidth="3"
                                         strokeLinejoin="round"
                                         strokeLinecap="round"
-                                        opacity="0.8"
+                                        opacity="0.9"
                                     />
                                     {/* Start marker */}
                                     <circle cx={sx} cy={sy} r="6" fill="#52B788" stroke="white" strokeWidth="2" />
@@ -136,7 +136,7 @@ export default function FlightMap({ lat, lon, gpsPath }: FlightMapProps) {
     }
 
     // Fallback: single point map (original behavior)
-    const mapSrc = `https://maps.google.com/maps?q=${lat},${lon}&z=15&output=embed`;
+    const mapSrc = `https://maps.google.com/maps?q=${lat},${lon}&z=15&t=k&output=embed`;
 
     return (
         <div style={{
