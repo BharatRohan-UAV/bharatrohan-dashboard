@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FlightLog, MaintenanceNote, supabase } from '@/lib/supabase';
 import FlightMap from '@/components/FlightMap';
 import MaintenanceNotes from '@/components/MaintenanceNotes';
+
+const MOBILE_BREAKPOINT = 768;
 
 function formatFileSize(bytes: number): string {
     if (bytes < 1024) return bytes + ' B';
@@ -37,6 +39,14 @@ export default function SerialDetailClient({
     notes: MaintenanceNote[];
 }) {
     const [selectedLog, setSelectedLog] = useState<FlightLog | null>(null);
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const check = () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+        check();
+        window.addEventListener('resize', check);
+        return () => window.removeEventListener('resize', check);
+    }, []);
 
     const handleDownload = async (storagePath: string, fileName: string) => {
         const { data, error } = await supabase.storage
@@ -68,16 +78,17 @@ export default function SerialDetailClient({
                 marginBottom: '20px',
                 alignItems: 'flex-start',
             }}>
-                {/* Flight Logs Table */}
+                {/* Flight Logs Table — hidden on mobile when a log is selected */}
                 <div style={{
                     backgroundColor: '#FFFFFF',
                     borderRadius: '12px',
                     border: '1px solid #E8E0D4',
                     padding: '24px',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                    flex: selectedLog ? '1 1 55%' : '1 1 100%',
+                    flex: selectedLog && !isMobile ? '1 1 55%' : '1 1 100%',
                     minWidth: 0,
                     transition: 'flex 0.3s ease',
+                    display: isMobile && selectedLog ? 'none' : 'block',
                 }}>
                     <h2 style={{ margin: '0 0 16px', color: '#1B4332', fontSize: '18px' }}>
                         Flight Logs
@@ -175,51 +186,75 @@ export default function SerialDetailClient({
                     )}
                 </div>
 
-                {/* Right-side Flight Detail Panel */}
+                {/* Flight Detail Panel — full width on mobile, 45% on desktop */}
                 {selectedLog && (
                     <div style={{
-                        flex: '0 0 45%',
+                        flex: isMobile ? '1 1 100%' : '0 0 45%',
                         backgroundColor: '#FFFFFF',
                         borderRadius: '12px',
                         border: '1px solid #E8E0D4',
                         boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
                         overflow: 'hidden',
-                        position: 'sticky',
-                        top: '20px',
+                        position: isMobile ? 'relative' : 'sticky',
+                        top: isMobile ? undefined : '20px',
                     }}>
                         {/* Panel Header */}
                         <div style={{
                             padding: '16px 20px',
                             backgroundColor: '#1B4332',
                             color: 'white',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
                         }}>
-                            <div>
-                                <div style={{ fontSize: '16px', fontWeight: 600 }}>
-                                    {selectedLog.file_name}
+                            {isMobile && (
+                                <button
+                                    onClick={() => setSelectedLog(null)}
+                                    style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        color: '#E8C547',
+                                        fontSize: '13px',
+                                        cursor: 'pointer',
+                                        padding: '0 0 8px',
+                                        fontWeight: 500,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                    }}
+                                >
+                                    &larr; Back to Logs
+                                </button>
+                            )}
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                            }}>
+                                <div>
+                                    <div style={{ fontSize: '16px', fontWeight: 600 }}>
+                                        {selectedLog.file_name}
+                                    </div>
+                                    <div style={{ fontSize: '12px', opacity: 0.8, marginTop: '2px' }}>
+                                        {selectedLog.log_date
+                                            ? new Date(selectedLog.log_date).toLocaleDateString()
+                                            : 'Date unknown'}
+                                    </div>
                                 </div>
-                                <div style={{ fontSize: '12px', opacity: 0.8, marginTop: '2px' }}>
-                                    {selectedLog.log_date
-                                        ? new Date(selectedLog.log_date).toLocaleDateString()
-                                        : 'Date unknown'}
-                                </div>
+                                {!isMobile && (
+                                    <button
+                                        onClick={() => setSelectedLog(null)}
+                                        style={{
+                                            background: 'none',
+                                            border: 'none',
+                                            color: 'white',
+                                            fontSize: '20px',
+                                            cursor: 'pointer',
+                                            padding: '4px 8px',
+                                            lineHeight: 1,
+                                        }}
+                                    >
+                                        &times;
+                                    </button>
+                                )}
                             </div>
-                            <button
-                                onClick={() => setSelectedLog(null)}
-                                style={{
-                                    background: 'none',
-                                    border: 'none',
-                                    color: 'white',
-                                    fontSize: '20px',
-                                    cursor: 'pointer',
-                                    padding: '4px 8px',
-                                    lineHeight: 1,
-                                }}
-                            >
-                                &times;
-                            </button>
                         </div>
 
                         {/* Flight Stats */}
