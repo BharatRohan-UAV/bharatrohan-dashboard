@@ -42,6 +42,17 @@ export default async function SerialDetailPage({
         .eq('drone_id', drone.id)
         .order('created_at', { ascending: false });
 
+    // Compute flight hours from individual log flight_time_seconds
+    const totalFlightSeconds = (logs || []).reduce(
+        (sum: number, log: FlightLog) => sum + (log.flight_time_seconds || 0), 0
+    );
+    const totalFlightHours = totalFlightSeconds / 3600;
+
+    // Compute total distance
+    const totalDistanceKm = (logs || []).reduce(
+        (sum: number, log: FlightLog) => sum + ((log.flight_distance_meters || 0) / 1000), 0
+    );
+
     return (
         <div>
             {/* Breadcrumb */}
@@ -100,7 +111,15 @@ export default async function SerialDetailPage({
                             FLIGHT HOURS
                         </div>
                         <div style={{ fontSize: '22px', fontWeight: 700, color: '#2D6A4F' }}>
-                            {drone.total_flight_hours?.toFixed(1) || '0.0'}
+                            {totalFlightHours.toFixed(1)}
+                        </div>
+                    </div>
+                    <div>
+                        <div style={{ fontSize: '12px', color: '#6B6B6B', fontWeight: 500, marginBottom: '4px' }}>
+                            TOTAL DISTANCE
+                        </div>
+                        <div style={{ fontSize: '22px', fontWeight: 700, color: '#2D6A4F' }}>
+                            {totalDistanceKm.toFixed(1)} km
                         </div>
                     </div>
                     <div>

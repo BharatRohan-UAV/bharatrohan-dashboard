@@ -16,14 +16,16 @@ export default async function HomePage() {
         .from('drones')
         .select('*');
 
-    const { data: logCounts } = await supabase
+    const { data: logs } = await supabase
         .from('flight_logs')
-        .select('drone_id');
+        .select('drone_id, flight_time_seconds');
 
     const countMap: Record<string, number> = {};
-    if (logCounts) {
-        for (const log of logCounts) {
+    const flightTimeMap: Record<string, number> = {};
+    if (logs) {
+        for (const log of logs) {
             countMap[log.drone_id] = (countMap[log.drone_id] || 0) + 1;
+            flightTimeMap[log.drone_id] = (flightTimeMap[log.drone_id] || 0) + (log.flight_time_seconds || 0);
         }
     }
 
@@ -51,9 +53,10 @@ export default async function HomePage() {
         for (const drone of drones) {
             const model = getModelFromSerial(drone.serial_num);
             const entry = models.find((m) => m.model === model);
+            const droneFlightHours = (flightTimeMap[drone.id] || 0) / 3600;
             if (entry) {
                 entry.droneCount += 1;
-                entry.totalFlightHours += drone.total_flight_hours || 0;
+                entry.totalFlightHours += droneFlightHours;
                 entry.logCount += countMap[drone.id] || 0;
             } else {
                 unassignedCount += 1;

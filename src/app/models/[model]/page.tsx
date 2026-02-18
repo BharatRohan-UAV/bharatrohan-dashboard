@@ -6,6 +6,7 @@ export const revalidate = 60;
 interface SerialInfo {
     drone: Drone;
     logCount: number;
+    flightHours: number;
     lastLat: number | null;
     lastLon: number | null;
 }
@@ -26,20 +27,22 @@ export default async function ModelPage({ params }: { params: { model: string } 
 
     const droneIds = drones.map((d: Drone) => d.id);
 
-    // Get log counts and latest GPS per drone
+    // Get log counts, flight time, and latest GPS per drone
     let logCountMap: Record<string, number> = {};
+    let flightTimeMap: Record<string, number> = {};
     let lastGpsMap: Record<string, { lat: number; lon: number }> = {};
 
     if (droneIds.length > 0) {
         const { data: logs } = await supabase
             .from('flight_logs')
-            .select('drone_id, last_lat, last_lon, uploaded_at')
+            .select('drone_id, last_lat, last_lon, uploaded_at, flight_time_seconds')
             .in('drone_id', droneIds)
             .order('uploaded_at', { ascending: false });
 
         if (logs) {
             for (const log of logs) {
                 logCountMap[log.drone_id] = (logCountMap[log.drone_id] || 0) + 1;
+                flightTimeMap[log.drone_id] = (flightTimeMap[log.drone_id] || 0) + (log.flight_time_seconds || 0);
                 if (!lastGpsMap[log.drone_id] && log.last_lat != null && log.last_lon != null) {
                     lastGpsMap[log.drone_id] = { lat: log.last_lat, lon: log.last_lon };
                 }
@@ -50,6 +53,7 @@ export default async function ModelPage({ params }: { params: { model: string } 
     const serials: SerialInfo[] = drones.map((drone: Drone) => ({
         drone,
         logCount: logCountMap[drone.id] || 0,
+        flightHours: (flightTimeMap[drone.id] || 0) / 3600,
         lastLat: lastGpsMap[drone.id]?.lat ?? null,
         lastLon: lastGpsMap[drone.id]?.lon ?? null,
     }));
@@ -115,7 +119,7 @@ export default async function ModelPage({ params }: { params: { model: string } 
                             </tr>
                         </thead>
                         <tbody>
-                            {serials.map(({ drone, logCount, lastLat, lastLon }) => (
+                            {serials.map(({ drone, logCount, flightHours, lastLat, lastLon }) => (
                                 <tr key={drone.id} style={{ borderBottom: '1px solid #E8E0D4' }}>
                                     <td style={tdStyle}>
                                         <Link
@@ -130,7 +134,7 @@ export default async function ModelPage({ params }: { params: { model: string } 
                                         </Link>
                                     </td>
                                     <td style={tdStyle}>
-                                        {drone.total_flight_hours?.toFixed(1) || '0.0'} hrs
+                                        {flightHours.toFixed(1)} hrs
                                     </td>
                                     <td style={tdStyle}>
                                         {lastLat != null && lastLon != null ? (

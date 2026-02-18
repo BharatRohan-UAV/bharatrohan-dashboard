@@ -25,6 +25,10 @@ export interface FlightLog {
     log_date: string | null;
     last_lat: number | null;
     last_lon: number | null;
+    flight_time_seconds: number | null;
+    flight_distance_meters: number | null;
+    firmware_version: string | null;
+    gps_path: number[][] | null;
 }
 
 export interface MaintenanceNote {
