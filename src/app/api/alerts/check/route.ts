@@ -3,7 +3,10 @@ import { createServiceClient, getModelFromSerial } from '@/lib/supabase';
 
 const THRESHOLD_HOURS = Number(process.env.ALERT_FLIGHT_HOURS_THRESHOLD ?? 50);
 const WEBHOOK_SECRET = process.env.ALERT_WEBHOOK_SECRET ?? '';
-const ZOHO_CLIQ_WEBHOOK_URL = process.env.ZOHO_CLIQ_WEBHOOK_URL ?? '';
+// Zoho Cliq Webhook Token API (Bots & Tools → Webhook Tokens)
+// Endpoint: https://cliq.zoho.com/api/v2/channelsbyname/{channel}/message?zapikey={token}
+const ZOHO_CLIQ_CHANNEL = process.env.ZOHO_CLIQ_CHANNEL ?? '';
+const ZOHO_CLIQ_API_KEY = process.env.ZOHO_CLIQ_API_KEY ?? '';
 
 export async function POST(req: NextRequest) {
     // Validate shared secret so only Supabase can call this
@@ -85,27 +88,36 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: insertError.message }, { status: 500 });
     }
 
-    // Send Zoho Cliq notification
-    if (ZOHO_CLIQ_WEBHOOK_URL) {
+    // Send Zoho Cliq notification via Webhook Token API
+    // Docs: https://www.zoho.com/cliq/help/platform/webhook-tokens.html
+    if (ZOHO_CLIQ_CHANNEL && ZOHO_CLIQ_API_KEY) {
         const hoursLabel = (THRESHOLD_HOURS * currentMultiple).toFixed(0);
+        const cliqUrl =
+            `https://cliq.zoho.in/api/v2/channelsbyname/${encodeURIComponent(ZOHO_CLIQ_CHANNEL)}/message` +
+            `?zapikey=${encodeURIComponent(ZOHO_CLIQ_API_KEY)}`;
+
         const message = {
             text: (
-                `⚠️ *Maintenance Due — ${modelName} ${serialNum}*\n` +
-                `Drone has reached *${totalHours.toFixed(1)} flight hours* ` +
-                `(threshold: ${hoursLabel}h).\n` +
-                `Please log a maintenance note on the fleet dashboard once serviced.`
+                `⚠️ Maintenance Due — ${modelName} ${serialNum}\n` +
+                `Drone has reached ${totalHours.toFixed(1)} flight hours ` +
+                `(interval: every ${hoursLabel}h).\n` +
+                `Log a maintenance note on the fleet dashboard once serviced: ` +
+                `https://bharatrohan-dashboard.vercel.app/models/${encodeURIComponent(modelName)}/${encodeURIComponent(serialNum)}`
             ),
         };
 
         try {
-            await fetch(ZOHO_CLIQ_WEBHOOK_URL, {
+            const res = await fetch(cliqUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(message),
             });
+            if (!res.ok) {
+                console.error('Zoho Cliq returned', res.status, await res.text());
+            }
         } catch (err) {
-            // Don't fail the request if Cliq is unreachable
-            console.error('Zoho Cliq webhook failed:', err);
+            // Don't fail the whole request if Cliq is unreachable
+            console.error('Zoho Cliq notification failed:', err);
         }
     }
 
