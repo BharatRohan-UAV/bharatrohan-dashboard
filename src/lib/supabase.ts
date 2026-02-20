@@ -5,6 +5,15 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+// Server-only client with elevated privileges (never import in client components)
+export function createServiceClient() {
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!serviceKey) throw new Error('SUPABASE_SERVICE_ROLE_KEY is not set');
+    return createClient(supabaseUrl, serviceKey, {
+        auth: { persistSession: false },
+    });
+}
+
 export interface Drone {
     id: string;
     serial_num: string;
@@ -29,6 +38,18 @@ export interface FlightLog {
     flight_distance_meters: number | null;
     firmware_version: string | null;
     gps_path: number[][] | null;
+}
+
+export interface DroneAlert {
+    id: string;
+    drone_id: string;
+    serial_num: string;
+    model_name: string | null;
+    threshold_multiple: number;
+    flight_hours_at_trigger: number | null;
+    triggered_at: string;
+    acknowledged_at: string | null;
+    acknowledged_by_note_id: string | null;
 }
 
 export interface MaintenanceNote {

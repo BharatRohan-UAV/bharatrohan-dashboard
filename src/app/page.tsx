@@ -1,5 +1,6 @@
 import { supabase, getModelFromSerial } from '@/lib/supabase';
 import Link from 'next/link';
+import AlertBanner from '@/components/AlertBanner';
 
 export const revalidate = 60;
 
@@ -9,6 +10,7 @@ interface ModelStats {
     droneCount: number;
     totalFlightHours: number;
     logCount: number;
+    hasAlert: boolean;
 }
 
 export default async function HomePage() {
@@ -19,6 +21,16 @@ export default async function HomePage() {
     const { data: logs } = await supabase
         .from('flight_logs')
         .select('drone_id, flight_time_seconds');
+
+    // Fetch unacknowledged alerts
+    const { data: activeAlerts } = await supabase
+        .from('drone_alerts')
+        .select('*')
+        .is('acknowledged_at', null)
+        .order('triggered_at', { ascending: false });
+
+    // Map drone_id → has active alert, for badge rendering
+    const alertedDroneIds = new Set((activeAlerts ?? []).map((a) => a.drone_id));
 
     const countMap: Record<string, number> = {};
     const flightTimeMap: Record<string, number> = {};
@@ -36,6 +48,7 @@ export default async function HomePage() {
             droneCount: 0,
             totalFlightHours: 0,
             logCount: 0,
+            hasAlert: false,
         },
         {
             model: 'PRAVIR-X4',
@@ -43,6 +56,7 @@ export default async function HomePage() {
             droneCount: 0,
             totalFlightHours: 0,
             logCount: 0,
+            hasAlert: false,
         },
     ];
 
@@ -58,6 +72,7 @@ export default async function HomePage() {
                 entry.droneCount += 1;
                 entry.totalFlightHours += droneFlightHours;
                 entry.logCount += countMap[drone.id] || 0;
+                if (alertedDroneIds.has(drone.id)) entry.hasAlert = true;
             } else {
                 unassignedCount += 1;
                 unassignedLogs += countMap[drone.id] || 0;
@@ -70,9 +85,14 @@ export default async function HomePage() {
             <h1 style={{ marginTop: 0, color: '#1B4332', fontSize: '28px', fontWeight: 700 }}>
                 Fleet Overview
             </h1>
-            <p style={{ color: '#6B6B6B', marginTop: '-8px', marginBottom: '32px' }}>
+            <p style={{ color: '#6B6B6B', marginTop: '-8px', marginBottom: '24px' }}>
                 Select a drone model to view fleet details
             </p>
+
+            {/* Alert banner — shown when any drone has unacknowledged alerts */}
+            {activeAlerts && activeAlerts.length > 0 && (
+                <AlertBanner alerts={activeAlerts} />
+            )}
 
             <div style={{
                 display: 'grid',
@@ -109,6 +129,21 @@ export default async function HomePage() {
                                     }}>
                                         {m.model}
                                     </h2>
+                                    {m.hasAlert && (
+                                        <span style={{
+                                            display: 'inline-block',
+                                            marginTop: '6px',
+                                            backgroundColor: '#FEF3C7',
+                                            color: '#92400E',
+                                            border: '1px solid #F59E0B',
+                                            padding: '2px 8px',
+                                            borderRadius: '999px',
+                                            fontSize: '11px',
+                                            fontWeight: 700,
+                                        }}>
+                                            ⚠ MAINTENANCE DUE
+                                        </span>
+                                    )}
                                 </div>
                                 <span style={{
                                     backgroundColor: '#1B4332',

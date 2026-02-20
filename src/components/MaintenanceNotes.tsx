@@ -35,6 +35,17 @@ export default function MaintenanceNotes({
         if (data) {
             setNotes([data, ...notes]);
             setNewNote('');
+
+            // Acknowledge any active alerts for this drone — the maintenance note
+            // serves as the service record. acknowledged_at captures the service date.
+            await supabase
+                .from('drone_alerts')
+                .update({
+                    acknowledged_at: new Date().toISOString(),
+                    acknowledged_by_note_id: data.id,
+                })
+                .eq('drone_id', droneId)
+                .is('acknowledged_at', null);
         }
     };
 
