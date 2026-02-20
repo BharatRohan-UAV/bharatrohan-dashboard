@@ -4,7 +4,8 @@ import { createServiceClient, getModelFromSerial } from '@/lib/supabase';
 const THRESHOLD_HOURS = Number(process.env.ALERT_FLIGHT_HOURS_THRESHOLD ?? 50);
 const WEBHOOK_SECRET = process.env.ALERT_WEBHOOK_SECRET ?? '';
 // Zoho Cliq Webhook Token API (Bots & Tools → Webhook Tokens)
-// Endpoint: https://cliq.zoho.com/api/v2/channelsbyname/{channel}/message?zapikey={token}
+// Endpoint: https://cliq.zoho.in/company/{companyId}/api/v2/channelsbyname/{channel}/message?zapikey={token}
+const ZOHO_CLIQ_COMPANY_ID = process.env.ZOHO_CLIQ_COMPANY_ID ?? '';
 const ZOHO_CLIQ_CHANNEL = process.env.ZOHO_CLIQ_CHANNEL ?? '';
 const ZOHO_CLIQ_API_KEY = process.env.ZOHO_CLIQ_API_KEY ?? '';
 
@@ -90,10 +91,10 @@ export async function POST(req: NextRequest) {
 
     // Send Zoho Cliq notification via Webhook Token API
     // Docs: https://www.zoho.com/cliq/help/platform/webhook-tokens.html
-    if (ZOHO_CLIQ_CHANNEL && ZOHO_CLIQ_API_KEY) {
+    if (ZOHO_CLIQ_COMPANY_ID && ZOHO_CLIQ_CHANNEL && ZOHO_CLIQ_API_KEY) {
         const hoursLabel = (THRESHOLD_HOURS * currentMultiple).toFixed(0);
         const cliqUrl =
-            `https://cliq.zoho.in/api/v2/channelsbyname/${encodeURIComponent(ZOHO_CLIQ_CHANNEL)}/message` +
+            `https://cliq.zoho.in/company/${ZOHO_CLIQ_COMPANY_ID}/api/v2/channelsbyname/${encodeURIComponent(ZOHO_CLIQ_CHANNEL)}/message` +
             `?zapikey=${encodeURIComponent(ZOHO_CLIQ_API_KEY)}`;
 
         const message = {
