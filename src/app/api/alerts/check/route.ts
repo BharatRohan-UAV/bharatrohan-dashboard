@@ -91,6 +91,8 @@ export async function POST(req: NextRequest) {
 
     // Send Zoho Cliq notification via Webhook Token API
     // Docs: https://www.zoho.com/cliq/help/platform/webhook-tokens.html
+    let cliqStatus: Record<string, unknown> = { skipped: 'env vars not set' };
+
     if (ZOHO_CLIQ_COMPANY_ID && ZOHO_CLIQ_CHANNEL && ZOHO_CLIQ_API_KEY) {
         const hoursLabel = (THRESHOLD_HOURS * currentMultiple).toFixed(0);
         const cliqUrl =
@@ -113,14 +115,19 @@ export async function POST(req: NextRequest) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(message),
             });
-            if (!res.ok) {
-                console.error('Zoho Cliq returned', res.status, await res.text());
-            }
+            const body = await res.text();
+            cliqStatus = { status: res.status, body };
         } catch (err) {
-            // Don't fail the whole request if Cliq is unreachable
-            console.error('Zoho Cliq notification failed:', err);
+            cliqStatus = { error: String(err) };
         }
+    } else {
+        cliqStatus = {
+            skipped: 'missing env vars',
+            has_company_id: !!ZOHO_CLIQ_COMPANY_ID,
+            has_channel: !!ZOHO_CLIQ_CHANNEL,
+            has_api_key: !!ZOHO_CLIQ_API_KEY,
+        };
     }
 
-    return NextResponse.json({ alerted: true, multiple: currentMultiple, hours: totalHours });
+    return NextResponse.json({ alerted: true, multiple: currentMultiple, hours: totalHours, cliq: cliqStatus });
 }
