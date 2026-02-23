@@ -1,0 +1,90 @@
+================================================================================
+        BharatRohan Fleet Dashboard — Environment Variables Reference
+================================================================================
+
+Project: bharatrohan-dashboard (Vercel)
+Backend: Supabase (bctbwlmizjpfjjrvsahq)
+Last updated: February 2026
+
+All variables must be set at the PROJECT level in Vercel (not team level).
+Go to: Vercel > bharatrohan-dashboard > Settings > Environment Variables
+
+--------------------------------------------------------------------------------
+ VARIABLE                       | PURPOSE
+--------------------------------------------------------------------------------
+
+ NEXT_PUBLIC_SUPABASE_URL       | Supabase project URL.
+                                | Example: https://bctbwlmizjpfjjrvsahq.supabase.co
+                                | Where to find: Supabase > Settings > API > URL
+                                |
+ NEXT_PUBLIC_SUPABASE_ANON_KEY  | Supabase anonymous/public key for client-side
+                                | queries. Safe to expose in the browser.
+                                | Where to find: Supabase > Settings > API > anon key
+                                |
+ SUPABASE_SERVICE_ROLE_KEY      | Supabase service role key with elevated privileges.
+                                | Used ONLY in server-side API routes (/api/alerts/check).
+                                | Bypasses Row Level Security. NEVER prefix with
+                                | NEXT_PUBLIC_ — must stay server-side only.
+                                | Where to find: Supabase > Settings > API > service_role
+                                |
+ ALERT_FLIGHT_HOURS_THRESHOLD   | Flight hours interval that triggers a maintenance
+                                | alert. Default: 50. Alerts fire at every multiple
+                                | (50h, 100h, 150h, ...).
+                                | Current value: 50
+                                |
+ ALERT_WEBHOOK_SECRET           | Shared secret between Supabase DB webhook and
+                                | the /api/alerts/check endpoint. Prevents
+                                | unauthorized calls. Must match the ?secret= param
+                                | in the Supabase webhook URL.
+                                | Current value: br_alert_k9x2mw7pqn4j
+                                |
+ ZOHO_CLIQ_COMPANY_ID           | BharatRohan's Zoho organization/company ID.
+                                | Found in the Zoho Cliq channel API endpoint URL.
+                                | Current value: 60026676324
+                                |
+ ZOHO_CLIQ_CHANNEL              | Unique name of the Zoho Cliq channel where
+                                | maintenance alerts are posted.
+                                | Current value: fleetmaintenancenotifications
+                                |
+ ZOHO_CLIQ_API_KEY              | Webhook token for posting messages to Zoho Cliq.
+                                | Generated from: Zoho Cliq > Bots & Tools >
+                                | Webhook Tokens > Generate New Token (requires 2FA).
+                                | Max 5 active tokens. Deleting a token breaks the
+                                | integration — replace before deleting.
+                                |
+
+--------------------------------------------------------------------------------
+ HOW THE ALERT PIPELINE WORKS
+--------------------------------------------------------------------------------
+
+ 1. QGC uploads flight logs → PATCHes drones.total_flight_hours in Supabase
+ 2. Supabase DB webhook (table: drones, event: UPDATE) fires
+ 3. Webhook calls: https://bharatrohan-dashboard.vercel.app/api/alerts/check
+    ?secret=br_alert_k9x2mw7pqn4j
+ 4. API route checks if flight hours crossed a new 50h multiple
+ 5. If yes: inserts row into drone_alerts table + POSTs to Zoho Cliq channel
+ 6. Dashboard home page reads drone_alerts and shows banner + badge
+ 7. Adding a maintenance note on the drone detail page acknowledges the alert
+
+--------------------------------------------------------------------------------
+ SUPABASE DB WEBHOOK CONFIGURATION
+--------------------------------------------------------------------------------
+
+ Location: Supabase > Database > Webhooks
+ Name:     drone-hours-alert
+ Table:    drones
+ Event:    UPDATE
+ Method:   POST
+ URL:      https://bharatrohan-dashboard.vercel.app/api/alerts/check
+           ?secret=br_alert_k9x2mw7pqn4j
+
+--------------------------------------------------------------------------------
+ SECURITY NOTES
+--------------------------------------------------------------------------------
+
+ - SUPABASE_SERVICE_ROLE_KEY: Never expose client-side. Has full DB access.
+ - ZOHO_CLIQ_API_KEY: Rotatable via Zoho Cliq admin. Sessions expire after 15min.
+ - ALERT_WEBHOOK_SECRET: Change periodically. Update both Vercel + Supabase webhook.
+ - All sensitive values are hidden in Vercel after saving (edit only, no read).
+
+================================================================================
