@@ -56,6 +56,18 @@ function formatTime(value: any): string {
     return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
+const toggleBtnStyle = (active: boolean, color: string): React.CSSProperties => ({
+    padding: '3px 10px',
+    fontSize: '11px',
+    fontWeight: 500,
+    border: `1.5px solid ${color}`,
+    borderRadius: '12px',
+    cursor: 'pointer',
+    backgroundColor: active ? color : 'transparent',
+    color: active ? '#FFFFFF' : color,
+    transition: 'all 0.15s ease',
+});
+
 export default function FlightGraphs({
     batteryData,
     altitudeData,
@@ -64,6 +76,9 @@ export default function FlightGraphs({
     loading,
 }: FlightGraphsProps) {
     const [activeTab, setActiveTab] = useState<TabKey>('battery');
+    const [showRoll, setShowRoll] = useState(true);
+    const [showPitch, setShowPitch] = useState(true);
+    const [showYaw, setShowYaw] = useState(false);
 
     const battery = useMemo(() =>
         (batteryData ?? []).map(([t, voltage, current, remaining]) => ({
@@ -75,21 +90,25 @@ export default function FlightGraphs({
         [batteryData]
     );
 
+    // BARO altitude: [[t, alt], ...]
     const altitude = useMemo(() =>
-        (altitudeData ?? []).map(([t, alt, desAlt]) => ({
-            time: +t.toFixed(1),
-            Altitude: +alt.toFixed(1),
-            'Desired Alt': +desAlt.toFixed(1),
+        (altitudeData ?? []).map((row) => ({
+            time: +row[0].toFixed(1),
+            Altitude: +(row[1]?.toFixed(1) ?? 0),
         })),
         [altitudeData]
     );
 
+    // ATT: [[t, roll, pitch, yaw, desRoll, desPitch, desYaw], ...]
     const attitude = useMemo(() =>
-        (attitudeData ?? []).map(([t, roll, pitch, yaw]) => ({
-            time: +t.toFixed(1),
-            Roll: +roll.toFixed(1),
-            Pitch: +pitch.toFixed(1),
-            Yaw: +yaw.toFixed(1),
+        (attitudeData ?? []).map((row) => ({
+            time: +row[0].toFixed(1),
+            Roll: +(row[1]?.toFixed(1) ?? 0),
+            Pitch: +(row[2]?.toFixed(1) ?? 0),
+            Yaw: +(row[3]?.toFixed(1) ?? 0),
+            DesRoll: +(row[4]?.toFixed(1) ?? 0),
+            DesPitch: +(row[5]?.toFixed(1) ?? 0),
+            DesYaw: +(row[6]?.toFixed(1) ?? 0),
         })),
         [attitudeData]
     );
@@ -265,7 +284,6 @@ export default function FlightGraphs({
                                 <Tooltip contentStyle={TOOLTIP_STYLE} labelFormatter={formatTime} />
                                 <Legend wrapperStyle={{ fontSize: '11px' }} />
                                 <Line type="monotone" dataKey="Altitude" stroke="#2D6A4F" strokeWidth={1.5} dot={false} />
-                                <Line type="monotone" dataKey="Desired Alt" stroke="#D4A017" strokeWidth={1.5} dot={false} strokeDasharray="5 5" />
                             </LineChart>
                         </ResponsiveContainer>
                     ) : <EmptyState label="Altitude" />
@@ -273,26 +291,48 @@ export default function FlightGraphs({
 
                 {activeTab === 'attitude' && (
                     attitude.length > 0 ? (
-                        <ResponsiveContainer width="100%" height={220}>
-                            <LineChart data={attitude}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#E8E0D4" />
-                                <XAxis
-                                    dataKey="time"
-                                    tick={{ fontSize: 10 }}
-                                    tickFormatter={formatTime}
-                                    label={{ value: 'Time', position: 'insideBottomRight', offset: -4, fontSize: 10, fill: '#999' }}
-                                />
-                                <YAxis
-                                    tick={{ fontSize: 10 }}
-                                    label={{ value: 'deg', angle: -90, position: 'insideLeft', fontSize: 10, fill: '#2D6A4F' }}
-                                />
-                                <Tooltip contentStyle={TOOLTIP_STYLE} labelFormatter={formatTime} />
-                                <Legend wrapperStyle={{ fontSize: '11px' }} />
-                                <Line type="monotone" dataKey="Roll" stroke="#2D6A4F" strokeWidth={1.5} dot={false} />
-                                <Line type="monotone" dataKey="Pitch" stroke="#D4A017" strokeWidth={1.5} dot={false} />
-                                <Line type="monotone" dataKey="Yaw" stroke="#52B788" strokeWidth={1.5} dot={false} />
-                            </LineChart>
-                        </ResponsiveContainer>
+                        <>
+                            {/* Toggle buttons for Roll/Pitch/Yaw pairs */}
+                            <div style={{
+                                display: 'flex',
+                                gap: '8px',
+                                marginBottom: '10px',
+                                justifyContent: 'center',
+                            }}>
+                                <button onClick={() => setShowRoll(!showRoll)} style={toggleBtnStyle(showRoll, '#2D6A4F')}>
+                                    Roll
+                                </button>
+                                <button onClick={() => setShowPitch(!showPitch)} style={toggleBtnStyle(showPitch, '#D4A017')}>
+                                    Pitch
+                                </button>
+                                <button onClick={() => setShowYaw(!showYaw)} style={toggleBtnStyle(showYaw, '#52B788')}>
+                                    Yaw
+                                </button>
+                            </div>
+                            <ResponsiveContainer width="100%" height={220}>
+                                <LineChart data={attitude}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#E8E0D4" />
+                                    <XAxis
+                                        dataKey="time"
+                                        tick={{ fontSize: 10 }}
+                                        tickFormatter={formatTime}
+                                        label={{ value: 'Time', position: 'insideBottomRight', offset: -4, fontSize: 10, fill: '#999' }}
+                                    />
+                                    <YAxis
+                                        tick={{ fontSize: 10 }}
+                                        label={{ value: 'deg', angle: -90, position: 'insideLeft', fontSize: 10, fill: '#2D6A4F' }}
+                                    />
+                                    <Tooltip contentStyle={TOOLTIP_STYLE} labelFormatter={formatTime} />
+                                    <Legend wrapperStyle={{ fontSize: '11px' }} />
+                                    {showRoll && <Line type="monotone" dataKey="Roll" stroke="#2D6A4F" strokeWidth={1.5} dot={false} />}
+                                    {showRoll && <Line type="monotone" dataKey="DesRoll" stroke="#2D6A4F" strokeWidth={1} dot={false} strokeDasharray="5 3" />}
+                                    {showPitch && <Line type="monotone" dataKey="Pitch" stroke="#D4A017" strokeWidth={1.5} dot={false} />}
+                                    {showPitch && <Line type="monotone" dataKey="DesPitch" stroke="#D4A017" strokeWidth={1} dot={false} strokeDasharray="5 3" />}
+                                    {showYaw && <Line type="monotone" dataKey="Yaw" stroke="#52B788" strokeWidth={1.5} dot={false} />}
+                                    {showYaw && <Line type="monotone" dataKey="DesYaw" stroke="#52B788" strokeWidth={1} dot={false} strokeDasharray="5 3" />}
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </>
                     ) : <EmptyState label="Attitude" />
                 )}
 
