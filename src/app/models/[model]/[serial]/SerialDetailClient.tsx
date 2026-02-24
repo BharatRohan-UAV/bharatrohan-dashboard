@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { FlightLog, MaintenanceNote, supabase } from '@/lib/supabase';
 import FlightMap from '@/components/FlightMap';
+import FlightGraphs from '@/components/FlightGraphs';
 import MaintenanceNotes from '@/components/MaintenanceNotes';
 
 const MOBILE_BREAKPOINT = 768;
@@ -40,6 +41,13 @@ export default function SerialDetailClient({
 }) {
     const [selectedLog, setSelectedLog] = useState<FlightLog | null>(null);
     const [isMobile, setIsMobile] = useState(false);
+    const [graphData, setGraphData] = useState<{
+        battery_data: number[][] | null;
+        altitude_data: number[][] | null;
+        attitude_data: number[][] | null;
+        vibration_data: number[][] | null;
+    } | null>(null);
+    const [loadingGraphs, setLoadingGraphs] = useState(false);
 
     useEffect(() => {
         const check = () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
@@ -47,6 +55,26 @@ export default function SerialDetailClient({
         window.addEventListener('resize', check);
         return () => window.removeEventListener('resize', check);
     }, []);
+
+    const handleSelectLog = async (log: FlightLog | null) => {
+        if (!log || selectedLog?.id === log.id) {
+            setSelectedLog(null);
+            setGraphData(null);
+            return;
+        }
+        setSelectedLog(log);
+        setGraphData(null);
+        setLoadingGraphs(true);
+
+        const { data } = await supabase
+            .from('flight_logs')
+            .select('battery_data, altitude_data, attitude_data, vibration_data')
+            .eq('id', log.id)
+            .single();
+
+        setGraphData(data);
+        setLoadingGraphs(false);
+    };
 
     const handleDownload = async (storagePath: string, fileName: string) => {
         const { data, error } = await supabase.storage
@@ -117,7 +145,7 @@ export default function SerialDetailClient({
                                         return (
                                             <tr
                                                 key={log.id}
-                                                onClick={() => canViewPath && setSelectedLog(isSelected ? null : log)}
+                                                onClick={() => canViewPath && handleSelectLog(isSelected ? null : log)}
                                                 style={{
                                                     borderBottom: '1px solid #E8E0D4',
                                                     backgroundColor: isSelected ? '#F0FAF4' : 'transparent',
@@ -166,7 +194,7 @@ export default function SerialDetailClient({
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                setSelectedLog(isSelected ? null : log);
+                                                                handleSelectLog(isSelected ? null : log);
                                                             }}
                                                             style={{
                                                                 ...btnStyle,
@@ -194,7 +222,9 @@ export default function SerialDetailClient({
                         borderRadius: '12px',
                         border: '1px solid #E8E0D4',
                         boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                        overflow: 'hidden',
+                        overflowY: 'auto',
+                        overflowX: 'hidden',
+                        maxHeight: isMobile ? undefined : 'calc(100vh - 40px)',
                         position: isMobile ? 'relative' : 'sticky',
                         top: isMobile ? undefined : '20px',
                     }}>
@@ -206,7 +236,7 @@ export default function SerialDetailClient({
                         }}>
                             {isMobile && (
                                 <button
-                                    onClick={() => setSelectedLog(null)}
+                                    onClick={() => handleSelectLog(null)}
                                     style={{
                                         background: 'none',
                                         border: 'none',
@@ -240,7 +270,7 @@ export default function SerialDetailClient({
                                 </div>
                                 {!isMobile && (
                                     <button
-                                        onClick={() => setSelectedLog(null)}
+                                        onClick={() => handleSelectLog(null)}
                                         style={{
                                             background: 'none',
                                             border: 'none',
@@ -326,6 +356,17 @@ export default function SerialDetailClient({
                                     No GPS data available
                                 </div>
                             )}
+                        </div>
+
+                        {/* Flight Analysis Graphs */}
+                        <div style={{ padding: '0 12px' }}>
+                            <FlightGraphs
+                                batteryData={graphData?.battery_data ?? null}
+                                altitudeData={graphData?.altitude_data ?? null}
+                                attitudeData={graphData?.attitude_data ?? null}
+                                vibrationData={graphData?.vibration_data ?? null}
+                                loading={loadingGraphs}
+                            />
                         </div>
 
                         {/* Download Button */}

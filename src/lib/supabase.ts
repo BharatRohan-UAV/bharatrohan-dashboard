@@ -22,6 +22,7 @@ export interface Drone {
     total_flight_hours: number;
     last_seen: string | null;
     created_at: string;
+    last_location_name: string | null;
 }
 
 export interface FlightLog {
@@ -38,6 +39,10 @@ export interface FlightLog {
     flight_distance_meters: number | null;
     firmware_version: string | null;
     gps_path: number[][] | null;
+    battery_data: number[][] | null;
+    altitude_data: number[][] | null;
+    attitude_data: number[][] | null;
+    vibration_data: number[][] | null;
 }
 
 export interface DroneAlert {

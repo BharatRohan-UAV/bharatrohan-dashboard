@@ -32,7 +32,7 @@ export default async function SerialDetailPage({
 
     const { data: logs } = await supabase
         .from('flight_logs')
-        .select('*')
+        .select('id, drone_id, file_name, storage_path, file_size_bytes, uploaded_at, log_date, last_lat, last_lon, flight_time_seconds, flight_distance_meters, firmware_version, gps_path')
         .eq('drone_id', drone.id)
         .order('uploaded_at', { ascending: false });
 
@@ -42,15 +42,18 @@ export default async function SerialDetailPage({
         .eq('drone_id', drone.id)
         .order('created_at', { ascending: false });
 
+    // Cast logs to FlightLog[] (graph columns excluded from SELECT for performance, loaded lazily on client)
+    const typedLogs = (logs || []) as FlightLog[];
+
     // Compute flight hours from individual log flight_time_seconds
-    const totalFlightSeconds = (logs || []).reduce(
-        (sum: number, log: FlightLog) => sum + (log.flight_time_seconds || 0), 0
+    const totalFlightSeconds = typedLogs.reduce(
+        (sum, log) => sum + (log.flight_time_seconds || 0), 0
     );
     const totalFlightHours = totalFlightSeconds / 3600;
 
     // Compute total distance
-    const totalDistanceKm = (logs || []).reduce(
-        (sum: number, log: FlightLog) => sum + ((log.flight_distance_meters || 0) / 1000), 0
+    const totalDistanceKm = typedLogs.reduce(
+        (sum, log) => sum + ((log.flight_distance_meters || 0) / 1000), 0
     );
 
     return (
@@ -127,7 +130,7 @@ export default async function SerialDetailPage({
                             TOTAL LOGS
                         </div>
                         <div style={{ fontSize: '22px', fontWeight: 700, color: '#2D6A4F' }}>
-                            {logs?.length || 0}
+                            {typedLogs.length}
                         </div>
                     </div>
                     <div>
@@ -146,7 +149,7 @@ export default async function SerialDetailPage({
             {/* Client section: logs with map + maintenance notes */}
             <SerialDetailClient
                 droneId={drone.id}
-                logs={logs || []}
+                logs={typedLogs}
                 notes={notes || []}
             />
         </div>

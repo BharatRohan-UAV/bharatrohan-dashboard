@@ -1,5 +1,6 @@
 import { supabase, Drone, FlightLog, getModelFromSerial } from '@/lib/supabase';
 import Link from 'next/link';
+import LocationCell from '@/components/LocationCell';
 
 export const revalidate = 60;
 
@@ -9,6 +10,7 @@ interface SerialInfo {
     flightHours: number;
     lastLat: number | null;
     lastLon: number | null;
+    lastLocationName: string | null;
 }
 
 export default async function ModelPage({ params }: { params: { model: string } }) {
@@ -56,6 +58,7 @@ export default async function ModelPage({ params }: { params: { model: string } 
         flightHours: (flightTimeMap[drone.id] || 0) / 3600,
         lastLat: lastGpsMap[drone.id]?.lat ?? null,
         lastLon: lastGpsMap[drone.id]?.lon ?? null,
+        lastLocationName: drone.last_location_name ?? null,
     }));
 
     return (
@@ -119,7 +122,7 @@ export default async function ModelPage({ params }: { params: { model: string } 
                             </tr>
                         </thead>
                         <tbody>
-                            {serials.map(({ drone, logCount, flightHours, lastLat, lastLon }) => (
+                            {serials.map(({ drone, logCount, flightHours, lastLat, lastLon, lastLocationName }) => (
                                 <tr key={drone.id} style={{ borderBottom: '1px solid #E8E0D4' }}>
                                     <td style={tdStyle}>
                                         <Link
@@ -137,13 +140,12 @@ export default async function ModelPage({ params }: { params: { model: string } 
                                         {flightHours.toFixed(1)} hrs
                                     </td>
                                     <td style={tdStyle}>
-                                        {lastLat != null && lastLon != null ? (
-                                            <span style={{ fontSize: '13px', color: '#2C2C2C' }}>
-                                                {lastLat.toFixed(4)}, {lastLon.toFixed(4)}
-                                            </span>
-                                        ) : (
-                                            <span style={{ color: '#999' }}>No GPS data</span>
-                                        )}
+                                        <LocationCell
+                                            lat={lastLat}
+                                            lon={lastLon}
+                                            droneId={drone.id}
+                                            cachedName={lastLocationName}
+                                        />
                                     </td>
                                     <td style={tdStyle}>
                                         <span style={{
