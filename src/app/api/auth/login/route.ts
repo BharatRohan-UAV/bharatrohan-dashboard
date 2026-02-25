@@ -16,18 +16,16 @@ export async function POST(req: NextRequest) {
         email_confirm: true,
     });
 
-    // Generate magic link server-side (no email sent)
+    // Generate magic link server-side — gives us the raw OTP token
     const { data, error } = await supabase.auth.admin.generateLink({
         type: 'magiclink',
         email,
-        options: {
-            redirectTo: `${req.nextUrl.origin}/auth/callback`,
-        },
     });
 
     if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ url: data.properties.action_link });
+    // Return the raw OTP token — client will verify it locally
+    return NextResponse.json({ token: data.properties.email_otp });
 }

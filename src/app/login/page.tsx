@@ -1,8 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { createBrowserSupabaseClient } from '@/lib/supabase';
 
 export default function LoginPage() {
+    const router = useRouter();
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -16,6 +19,7 @@ export default function LoginPage() {
 
         setLoading(true);
         try {
+            // Get OTP token from server (no email sent)
             const res = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -30,8 +34,22 @@ export default function LoginPage() {
                 return;
             }
 
-            // Redirect through Supabase verify → our /auth/callback
-            window.location.href = data.url;
+            // Verify token client-side to create session cookies
+            const supabase = createBrowserSupabaseClient();
+            const { error: verifyError } = await supabase.auth.verifyOtp({
+                email,
+                token: data.token,
+                type: 'email',
+            });
+
+            if (verifyError) {
+                setError(verifyError.message);
+                setLoading(false);
+                return;
+            }
+
+            router.push('/');
+            router.refresh();
         } catch {
             setError('Login failed. Please try again.');
             setLoading(false);
