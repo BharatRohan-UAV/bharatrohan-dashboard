@@ -1,4 +1,4 @@
-import { supabase, Drone, FlightLog, getModelFromSerial } from '@/lib/supabase';
+import { createServerSupabaseClient, Drone, FlightLog, getModelFromSerial } from '@/lib/supabase';
 import Link from 'next/link';
 import LocationCell from '@/components/LocationCell';
 
@@ -14,6 +14,7 @@ interface SerialInfo {
 }
 
 export default async function ModelPage({ params }: { params: { model: string } }) {
+    const supabase = await createServerSupabaseClient();
     const model = decodeURIComponent(params.model);
 
     const { data: allDrones } = await supabase

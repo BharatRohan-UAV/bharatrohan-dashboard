@@ -1,6 +1,6 @@
 'use client';
 
-import { supabase, FlightLog } from '@/lib/supabase';
+import { createBrowserSupabaseClient, FlightLog } from '@/lib/supabase';
 
 function formatFileSize(bytes: number): string {
     if (bytes < 1024) return bytes + ' B';
@@ -9,6 +9,8 @@ function formatFileSize(bytes: number): string {
 }
 
 export default function LogTable({ logs }: { logs: FlightLog[] }) {
+    const supabase = createBrowserSupabaseClient();
+
     const handleDownload = async (storagePath: string, fileName: string) => {
         const { data, error } = await supabase.storage
             .from('flight-logs')

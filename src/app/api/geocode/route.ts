@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServiceClient } from '@/lib/supabase';
+import { createServerSupabaseClient, createServiceClient } from '@/lib/supabase';
 
 export async function GET(req: NextRequest) {
+    // Verify authenticated session
+    const supabase = await createServerSupabaseClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const lat = req.nextUrl.searchParams.get('lat');
     const lon = req.nextUrl.searchParams.get('lon');
     const droneId = req.nextUrl.searchParams.get('droneId');

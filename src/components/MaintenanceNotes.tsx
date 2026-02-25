@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase, MaintenanceNote } from '@/lib/supabase';
+import { createBrowserSupabaseClient, MaintenanceNote } from '@/lib/supabase';
 
 export default function MaintenanceNotes({
     droneId,
@@ -13,6 +13,7 @@ export default function MaintenanceNotes({
     const [notes, setNotes] = useState<MaintenanceNote[]>(initialNotes);
     const [newNote, setNewNote] = useState('');
     const [saving, setSaving] = useState(false);
+    const supabase = createBrowserSupabaseClient();
 
     const addNote = async () => {
         const trimmed = newNote.trim();

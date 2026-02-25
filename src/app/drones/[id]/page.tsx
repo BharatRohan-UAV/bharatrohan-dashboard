@@ -1,4 +1,4 @@
-import { supabase, Drone, FlightLog, MaintenanceNote } from '@/lib/supabase';
+import { createServerSupabaseClient, Drone, FlightLog, MaintenanceNote } from '@/lib/supabase';
 import Link from 'next/link';
 import LogTable from '@/components/LogTable';
 import MaintenanceNotes from '@/components/MaintenanceNotes';
@@ -6,6 +6,8 @@ import MaintenanceNotes from '@/components/MaintenanceNotes';
 export const revalidate = 60;
 
 export default async function DroneDetailPage({ params }: { params: { id: string } }) {
+    const supabase = await createServerSupabaseClient();
+
     const { data: drone } = await supabase
         .from('drones')
         .select('*')

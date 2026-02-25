@@ -1,4 +1,4 @@
-import { supabase, Drone, FlightLog, getModelFromSerial } from '@/lib/supabase';
+import { createServerSupabaseClient, Drone, FlightLog, getModelFromSerial } from '@/lib/supabase';
 import Link from 'next/link';
 import SerialDetailClient from './SerialDetailClient';
 
@@ -9,6 +9,7 @@ export default async function SerialDetailPage({
 }: {
     params: { model: string; serial: string };
 }) {
+    const supabase = await createServerSupabaseClient();
     const model = decodeURIComponent(params.model);
     const serial = decodeURIComponent(params.serial);
 

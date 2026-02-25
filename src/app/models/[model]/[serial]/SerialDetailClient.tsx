@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FlightLog, MaintenanceNote, supabase } from '@/lib/supabase';
+import { FlightLog, MaintenanceNote, createBrowserSupabaseClient } from '@/lib/supabase';
 import FlightMap from '@/components/FlightMap';
 import FlightGraphs from '@/components/FlightGraphs';
 import MaintenanceNotes from '@/components/MaintenanceNotes';
@@ -48,6 +48,7 @@ export default function SerialDetailClient({
         vibration_data: number[][] | null;
     } | null>(null);
     const [loadingGraphs, setLoadingGraphs] = useState(false);
+    const supabase = createBrowserSupabaseClient();
 
     useEffect(() => {
         const check = () => setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);

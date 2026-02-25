@@ -1,11 +1,39 @@
 import { createClient } from '@supabase/supabase-js';
+import { createBrowserClient, createServerClient } from '@supabase/ssr';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Browser client — use in 'use client' components
+export function createBrowserSupabaseClient() {
+    return createBrowserClient(supabaseUrl, supabaseAnonKey);
+}
 
-// Server-only client with elevated privileges (never import in client components)
+// Server client — use in server components & API routes (reads/writes auth cookies)
+export async function createServerSupabaseClient() {
+    const { cookies } = await import('next/headers');
+    const cookieStore = cookies();
+
+    return createServerClient(supabaseUrl, supabaseAnonKey, {
+        cookies: {
+            getAll() {
+                return cookieStore.getAll();
+            },
+            setAll(cookiesToSet) {
+                try {
+                    cookiesToSet.forEach(({ name, value, options }) =>
+                        cookieStore.set(name, value, options)
+                    );
+                } catch {
+                    // setAll can fail in Server Components (read-only).
+                    // This is fine — middleware handles the refresh.
+                }
+            },
+        },
+    });
+}
+
+// Service-role client — server-only, bypasses RLS (never import in client components)
 export function createServiceClient() {
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!serviceKey) throw new Error('SUPABASE_SERVICE_ROLE_KEY is not set');

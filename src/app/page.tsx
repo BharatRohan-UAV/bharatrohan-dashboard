@@ -1,4 +1,4 @@
-import { supabase, getModelFromSerial } from '@/lib/supabase';
+import { createServerSupabaseClient, getModelFromSerial } from '@/lib/supabase';
 import Link from 'next/link';
 import AlertBanner from '@/components/AlertBanner';
 
@@ -14,6 +14,8 @@ interface ModelStats {
 }
 
 export default async function HomePage() {
+    const supabase = await createServerSupabaseClient();
+
     const { data: drones } = await supabase
         .from('drones')
         .select('*');

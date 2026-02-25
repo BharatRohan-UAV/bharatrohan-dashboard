@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import 'leaflet/dist/leaflet.css';
+import AuthStatus from '@/components/AuthStatus';
 
 export const metadata: Metadata = {
     title: 'BharatRohan Fleet Management',
@@ -57,6 +58,7 @@ export default function RootLayout({
                             </span>
                         </div>
                     </Link>
+                    <AuthStatus />
                 </nav>
                 <div style={{
                     height: '3px',
