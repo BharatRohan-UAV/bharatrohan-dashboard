@@ -13,6 +13,12 @@ export default function AuthStatus() {
         supabase.auth.getUser().then(({ data: { user } }) => {
             setEmail(user?.email ?? null);
         });
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setEmail(session?.user?.email ?? null);
+        });
+
+        return () => subscription.unsubscribe();
     }, [supabase]);
 
     if (!email) return null;

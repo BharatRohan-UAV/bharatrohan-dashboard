@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserSupabaseClient } from '@/lib/supabase';
-import Image from 'next/image';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -62,28 +61,19 @@ export default function LoginPage() {
     return (
         <div style={{
             width: '100%',
-            maxWidth: '400px',
+            maxWidth: '380px',
         }}>
-            {/* Logo */}
             <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-                <Image
-                    src="/logo2.png"
-                    alt="BharatRohan"
-                    width={80}
-                    height={80}
-                    style={{ objectFit: 'contain' }}
-                    priority
-                />
                 <h1 style={{
-                    color: '#1B4332',
-                    fontSize: '24px',
+                    color: '#FFFFFF',
+                    fontSize: '26px',
                     fontWeight: 700,
-                    margin: '12px 0 4px',
+                    margin: '0 0 6px',
                 }}>
                     Fleet Management
                 </h1>
                 <p style={{
-                    color: '#6B6B6B',
+                    color: 'rgba(255,255,255,0.7)',
                     fontSize: '14px',
                     margin: 0,
                 }}>
@@ -95,9 +85,8 @@ export default function LoginPage() {
             <div style={{
                 backgroundColor: '#FFFFFF',
                 borderRadius: '12px',
-                border: '1px solid #E8E0D4',
                 padding: '32px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
             }}>
                 {step === 'email' ? (
                     <>
@@ -233,6 +222,15 @@ export default function LoginPage() {
                     </div>
                 )}
             </div>
+
+            <p style={{
+                textAlign: 'center',
+                color: 'rgba(255,255,255,0.4)',
+                fontSize: '12px',
+                marginTop: '24px',
+            }}>
+                BharatRohan Aerial Innovations
+            </p>
         </div>
     );
 }
