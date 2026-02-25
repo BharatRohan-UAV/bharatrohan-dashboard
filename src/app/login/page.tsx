@@ -229,7 +229,7 @@ export default function LoginPage() {
                 fontSize: '12px',
                 marginTop: '24px',
             }}>
-                BharatRohan Aerial Innovations
+                BharatRohan Airborne Innovations Limited. All rights reserved.
             </p>
         </div>
     );
