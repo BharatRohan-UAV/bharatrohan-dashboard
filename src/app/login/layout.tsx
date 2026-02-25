@@ -9,7 +9,7 @@ export default function LoginLayout({ children }: { children: React.ReactNode })
             justifyContent: 'center',
             background: 'linear-gradient(145deg, #1B4332 0%, #0F2B21 50%, #1A3C2F 100%)',
             padding: '24px',
-            overflow: 'auto',
+            overflow: 'hidden',
             zIndex: 10,
         }}>
             {/* Subtle decorative circles */}
