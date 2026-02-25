@@ -1,12 +1,16 @@
 export default function LoginLayout({ children }: { children: React.ReactNode }) {
     return (
         <>
-            {/* Hide root layout nav bar and content wrapper on login page */}
+            {/* Hide root layout nav bar and gold stripe on login page */}
             <style>{`
                 body > nav,
-                body > nav + div,
-                body > div[style*="max-width"] {
+                body > nav + div[style*="height: 3px"] {
                     display: none !important;
+                }
+                body > div[style*="max-width"] {
+                    padding: 0 !important;
+                    max-width: none !important;
+                    margin: 0 !important;
                 }
             `}</style>
             <div style={{
