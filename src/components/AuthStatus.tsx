@@ -4,28 +4,23 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserSupabaseClient } from '@/lib/supabase';
 
-const supabase = createBrowserSupabaseClient();
-
 export default function AuthStatus() {
     const router = useRouter();
     const [email, setEmail] = useState<string | null>(null);
 
     useEffect(() => {
+        const supabase = createBrowserSupabaseClient();
         supabase.auth.getUser().then(({ data: { user } }) => {
             setEmail(user?.email ?? null);
         });
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setEmail(session?.user?.email ?? null);
-        });
-
-        return () => subscription.unsubscribe();
     }, []);
 
     if (!email) return null;
 
     const handleLogout = async () => {
+        const supabase = createBrowserSupabaseClient();
         await supabase.auth.signOut();
+        setEmail(null);
         router.push('/login');
         router.refresh();
     };
