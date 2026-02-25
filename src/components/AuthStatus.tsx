@@ -4,9 +4,10 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserSupabaseClient } from '@/lib/supabase';
 
+const supabase = createBrowserSupabaseClient();
+
 export default function AuthStatus() {
     const router = useRouter();
-    const supabase = createBrowserSupabaseClient();
     const [email, setEmail] = useState<string | null>(null);
 
     useEffect(() => {
@@ -19,7 +20,7 @@ export default function AuthStatus() {
         });
 
         return () => subscription.unsubscribe();
-    }, [supabase]);
+    }, []);
 
     if (!email) return null;
 
