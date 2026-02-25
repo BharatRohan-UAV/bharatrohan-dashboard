@@ -65,7 +65,7 @@ export default function LoginPage() {
         }}>
             <div style={{ textAlign: 'center', marginBottom: '32px' }}>
                 <h1 style={{
-                    color: '#FFFFFF',
+                    color: '#1B4332',
                     fontSize: '26px',
                     fontWeight: 700,
                     margin: '0 0 6px',
@@ -73,7 +73,7 @@ export default function LoginPage() {
                     Fleet Management
                 </h1>
                 <p style={{
-                    color: 'rgba(255,255,255,0.7)',
+                    color: '#6B6B6B',
                     fontSize: '14px',
                     margin: 0,
                 }}>
@@ -225,7 +225,7 @@ export default function LoginPage() {
 
             <p style={{
                 textAlign: 'center',
-                color: 'rgba(255,255,255,0.4)',
+                color: '#999',
                 fontSize: '12px',
                 marginTop: '24px',
             }}>
